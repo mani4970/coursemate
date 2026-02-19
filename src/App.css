@@ -1,0 +1,42 @@
+/* 전체 페이지 중앙 정렬 */
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background: #f5f5f5;
+}
+
+#root {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.app {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: white;
+}
+
+/* 터치 하이라이트 제거 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 포커스 아웃라인 제거 */
+button:focus,
+a:focus,
+input:focus {
+  outline: none;
+}
+
+/* 터치 기기에서 테두리 색 변경 방지 */
+@media (hover: none) and (pointer: coarse) {
+  button:active {
+    border-color: inherit !important;
+  }
+}
