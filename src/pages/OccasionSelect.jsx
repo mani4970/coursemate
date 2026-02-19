@@ -13,7 +13,7 @@ export default function OccasionSelect({ location, onNext, onBack }) {
           {[1,2,3,4,5].map(i => (
             <div key={i} style={{
               flex: 1, height: '4px', borderRadius: '2px',
-              background: i <= 2 ? '#f0f0f0' : '#f0f0f0'
+              background: i <= 2 ? '#FF6B35' : '#f0f0f0'
             }} />
           ))}
         </div>
@@ -23,7 +23,7 @@ export default function OccasionSelect({ location, onNext, onBack }) {
           fontSize: '15px', cursor: 'pointer', padding: '0 0 12px 0'
         }}>← 이전으로</button>
 
-        <p style={{ color: '#666', fontWeight: '600', marginBottom: '8px' }}>
+        <p style={{ color: '#FF6B35', fontWeight: '600', marginBottom: '8px' }}>
           Step 2 / 5
         </p>
         <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1a1a1a' }}>

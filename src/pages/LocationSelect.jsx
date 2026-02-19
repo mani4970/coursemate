@@ -6,7 +6,7 @@ export default function LocationSelect({ hotspots, onNext, onBack }) {
           {[1,2,3,4,5].map(i => (
             <div key={i} style={{
               flex: 1, height: '4px', borderRadius: '2px',
-              background: i === 1 ? '#f0f0f0' : '#f0f0f0'
+              background: i === 1 ? '#FF6B35' : '#f0f0f0'
             }} />
           ))}
         </div>
@@ -21,7 +21,7 @@ export default function LocationSelect({ hotspots, onNext, onBack }) {
           </button>
         )}
 
-        <p style={{ color: '#666', fontWeight: '600', marginBottom: '8px' }}>
+        <p style={{ color: '#FF6B35', fontWeight: '600', marginBottom: '8px' }}>
           Step 1 / 5
         </p>
         <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1a1a1a' }}>

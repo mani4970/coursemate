@@ -122,7 +122,12 @@ export default async function handler(req) {
     }
 
     // 카페/바 또는 전체 레스토랑 - searchNearby 사용
-    const includedType = type === 'restaurant' ? 'restaurant' : (type === 'cafe' ? 'cafe' : 'bar')
+    // Google Places types: bars are often categorized as pub/night_club in Korea.
+    // We broaden the includedTypes and then filter by primaryType to reduce "bar but restaurant" mismatches.
+    const includedTypes =
+      type === 'restaurant' ? ['restaurant'] :
+      type === 'cafe' ? ['cafe', 'coffee_shop'] :
+      ['bar', 'pub', 'night_club']
 
     const googleRes = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
       method: 'POST',
@@ -132,7 +137,7 @@ export default async function handler(req) {
         'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.photos,places.primaryType,places.priceLevel'
       },
       body: JSON.stringify({
-        includedTypes: [includedType],
+        includedTypes,
         locationRestriction: {
           circle: {
             center: { latitude: lat, longitude: lng },
@@ -147,8 +152,14 @@ export default async function handler(req) {
     })
 
     const data = await googleRes.json()
+
+    const allowedPrimaryTypes = new Set(
+      type === 'restaurant' ? ['restaurant'] :
+      type === 'cafe' ? ['cafe', 'coffee_shop'] :
+      ['bar', 'pub', 'night_club']
+    )
     
-    const places = (data.places || []).map(p => ({
+    let places = (data.places || []).map(p => ({
       placeId: p.id,
       name: p.displayName?.text || '',
       address: p.formattedAddress || '',
@@ -164,6 +175,11 @@ export default async function handler(req) {
       distanceMeters: haversineDistance(lat, lng, p.location?.latitude, p.location?.longitude),
       kakaoMapUrl: `https://map.kakao.com/link/map/${encodeURIComponent(p.displayName?.text || '')},${p.location?.latitude},${p.location?.longitude}`
     }))
+
+    // Filter out obvious mismatches (e.g., bar list that mostly returns restaurants)
+    if (type !== 'restaurant') {
+      places = places.filter(p => !p.primaryType || allowedPrimaryTypes.has(p.primaryType))
+    }
 
     const sorted = places.sort((a, b) => {
       const aScore = (a.rating || 0) * Math.log10((a.userRatingsTotal || 0) + 10)

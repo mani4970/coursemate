@@ -1,105 +1,60 @@
 import { useEffect, useRef, useState } from 'react'
 import { getTypeLabel } from '../placeTypes'
 
-export default function FinalCourse({ selections, onRestart, onBack }) {
-  const mapRef = useRef(null)
-  const [walkingTimes, setWalkingTimes] = useState([])
+function haversineMeters(lat1, lon1, lat2, lon2) {
+  if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return null
+  const toRad = x => (x * Math.PI) / 180
+  const R = 6371000
+  const dLat = toRad(lat2 - lat1)
+  const dLon = toRad(lon2 - lon1)
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2
+  return Math.round(2 * R * Math.asin(Math.sqrt(a)))
+}
 
-  const haversineMeters = (a, b) => {
-    if (!a || !b) return null
-    const R = 6371000
-    const toRad = (d) => (d * Math.PI) / 180
-    const dLat = toRad(b.lat - a.lat)
-    const dLng = toRad(b.lng - a.lng)
-    const lat1 = toRad(a.lat)
-    const lat2 = toRad(b.lat)
-    const x = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2
-    const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x))
-    return Math.round(R * c)
-  }
+function b64EncodeUnicode(str) {
+  return btoa(unescape(encodeURIComponent(str)))
+}
 
-  useEffect(() => {
-    function initMap() {
-      const places = (selections.routePlaces && selections.routePlaces.length)
-        ? selections.routePlaces
-        : [selections.restaurant, selections.restaurant2, selections.cafe, selections.cafe2].filter(Boolean)
-      if (places.length === 0 || !mapRef.current) return
+function buildOrderedPlaces(selections) {
+  const { restaurant, cafe, cafe2, courseOrder = [] } = selections
 
-      const center = new window.kakao.maps.LatLng(places[0].lat, places[0].lng)
-      const map = new window.kakao.maps.Map(mapRef.current, { center, level: 4 })
-
-      const icons = ['🍽️', '☕', '🍺']
-      places.forEach((place, idx) => {
-        new window.kakao.maps.InfoWindow({
-          content: '<div style="padding:6px 10px;font-size:13px;font-weight:700;color:#f0f0f0">' + icons[idx] + ' ' + place.name + '</div>'
-        }).open(map, new window.kakao.maps.Marker({
-          position: new window.kakao.maps.LatLng(place.lat, place.lng),
-          map,
-        }))
-      })
-
-      const times = []
-      for (let i = 0; i < places.length - 1; i++) {
-        const dist = places[i + 1].distanceMeters || haversineMeters(places[i], places[i + 1])
-        if (!dist) { times.push(null); continue }
-        times.push({
-          minutes: Math.max(1, Math.ceil(dist / 67)),
-          distance: dist < 1000 ? dist + 'm' : (dist / 1000).toFixed(1) + 'km'
-        })
-      }
-      setWalkingTimes(times)
-
-      const bounds = new window.kakao.maps.LatLngBounds()
-      places.forEach(p => bounds.extend(new window.kakao.maps.LatLng(p.lat, p.lng)))
-      map.setBounds(bounds)
-    }
-
-    if (window.kakao && window.kakao.maps) {
-      window.kakao.maps.load(initMap)
-    }
-  }, [])
-
-  const { restaurant, cafe, cafe2, hotspot, occasion, courseOrder = [] } = selections
-  const { restaurant2 } = selections
-  
-  // Prefer a concrete ordered list if provided
   const orderedPlaces = []
   const orderedIcons = []
 
-  if (selections.routePlaces && selections.routePlaces.length) {
-    selections.routePlaces.forEach((p, idx) => {
-      orderedPlaces.push(p)
-      orderedIcons.push(['🍽️','☕','🍺','🍽️'][idx] || '📍')
-    })
-  } else {
-    const usedSecondRestaurant = { value: false }
-    courseOrder.forEach(type => {
+  // if courseOrder is provided, honor it
+  if (Array.isArray(courseOrder) && courseOrder.length > 0) {
+    courseOrder.forEach((type, idx) => {
       if (type === 'restaurant') {
-        if (!usedSecondRestaurant.value && restaurant) {
+        if (idx === 0 && restaurant) {
           orderedPlaces.push(restaurant)
           orderedIcons.push('🍽️')
-          usedSecondRestaurant.value = true
-        } else if (restaurant2) {
-          orderedPlaces.push(restaurant2)
-          orderedIcons.push('🍽️')
+        } else if (idx > 0) {
+          // second restaurant uses the 'cafe' slot in direct flow
+          const second = cafe
+          if (second) {
+            orderedPlaces.push(second)
+            orderedIcons.push('🍽️')
+          }
         }
-      } else if (type === 'cafe' && cafe) {
-        orderedPlaces.push(cafe)
-        orderedIcons.push('☕')
-      } else if (type === 'bar' && (cafe2 || cafe)) {
-        orderedPlaces.push(cafe2 || cafe)
-        orderedIcons.push('🍺')
+      } else if (type === 'cafe') {
+        if (cafe) {
+          orderedPlaces.push(cafe)
+          orderedIcons.push('☕')
+        }
+      } else if (type === 'bar') {
+        const barPlace = cafe2 || cafe
+        if (barPlace) {
+          orderedPlaces.push(barPlace)
+          orderedIcons.push('🍺')
+        }
       }
     })
   }
 
+  // fallback for older saved states
   if (orderedPlaces.length === 0) {
     if (restaurant) {
       orderedPlaces.push(restaurant)
-      orderedIcons.push('🍽️')
-    }
-    if (restaurant2) {
-      orderedPlaces.push(restaurant2)
       orderedIcons.push('🍽️')
     }
     if (cafe) {
@@ -111,6 +66,60 @@ export default function FinalCourse({ selections, onRestart, onBack }) {
       orderedIcons.push('🍺')
     }
   }
+
+  return { orderedPlaces, orderedIcons }
+}
+
+export default function FinalCourse({ selections, onRestart, onBack }) {
+  const mapRef = useRef(null)
+  const [walkingTimes, setWalkingTimes] = useState([])
+
+  const { orderedPlaces, orderedIcons } = buildOrderedPlaces(selections)
+
+  useEffect(() => {
+    function initMap() {
+      const places = orderedPlaces
+      if (places.length === 0 || !mapRef.current) return
+
+      const center = new window.kakao.maps.LatLng(places[0].lat, places[0].lng)
+      const map = new window.kakao.maps.Map(mapRef.current, { center, level: 4 })
+
+      const icons = orderedIcons
+      places.forEach((place, idx) => {
+        new window.kakao.maps.InfoWindow({
+          content: '<div style="padding:6px 10px;font-size:13px;font-weight:700;color:#FF6B35">' + icons[idx] + ' ' + place.name + '</div>'
+        }).open(map, new window.kakao.maps.Marker({
+          position: new window.kakao.maps.LatLng(place.lat, place.lng),
+          map,
+        }))
+      })
+
+      // compute distances between consecutive points (works for restaurant->restaurant too)
+      const times = []
+      for (let i = 0; i < places.length - 1; i++) {
+        const dist = haversineMeters(places[i].lat, places[i].lng, places[i + 1].lat, places[i + 1].lng)
+        if (dist != null) {
+          times.push({
+            minutes: Math.max(1, Math.ceil(dist / 67)),
+            distance: dist < 1000 ? dist + 'm' : (dist / 1000).toFixed(1) + 'km'
+          })
+        } else {
+          times.push(null)
+        }
+      }
+      setWalkingTimes(times)
+
+      const bounds = new window.kakao.maps.LatLngBounds()
+      places.forEach(p => bounds.extend(new window.kakao.maps.LatLng(p.lat, p.lng)))
+      map.setBounds(bounds)
+    }
+
+    if (window.kakao && window.kakao.maps) {
+      window.kakao.maps.load(initMap)
+    }
+  }, [selections])
+
+  const { restaurant, cafe, cafe2, hotspot, occasion } = selections
 
   function handleKakaoShare() {
     if (!window.Kakao) return
@@ -131,31 +140,50 @@ export default function FinalCourse({ selections, onRestart, onBack }) {
         x: Number(cafe.lat.toFixed(4)),
         y: Number(cafe.lng.toFixed(4))
       } : null,
+      b: cafe2 ? {
+        n: cafe2.name,
+        x: Number(cafe2.lat.toFixed(4)),
+        y: Number(cafe2.lng.toFixed(4))
+      } : null,
     }
 
-    const shareUrl = 'https://coursemate-xi.vercel.app?s=' + btoa(JSON.stringify(shareData))
+    const shareUrl = window.location.origin + '?s=' + b64EncodeUnicode(JSON.stringify(shareData))
 
-    window.Kakao.Share.sendDefault({
-      objectType: 'feed',
-      content: {
-        title: (hotspot?.name || '서울') + ' 코스 🗺️',
-        description: orderedPlaces.map((p, i) => orderedIcons[i] + ' ' + p.name).join('  →  '),
-        imageUrl: 'https://coursemate-xi.vercel.app/og-image.png',
-        link: {
-          mobileWebUrl: shareUrl,
-          webUrl: shareUrl,
-        },
-      },
-      buttons: [
-        {
-          title: '코스 보기 🗺️',
+    try {
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: (hotspot?.name || '서울') + ' 코스 🗺️',
+          description: orderedPlaces.map((p, i) => orderedIcons[i] + ' ' + p.name).join('  →  '),
+          imageUrl: window.location.origin + '/og-image.png',
           link: {
             mobileWebUrl: shareUrl,
             webUrl: shareUrl,
           },
         },
-      ],
-    })
+        buttons: [
+          {
+            title: '코스 보기 🗺️',
+            link: {
+              mobileWebUrl: shareUrl,
+              webUrl: shareUrl,
+            },
+          },
+        ],
+      })
+    } catch (e) {
+      // fallback for mobile/web share
+      if (navigator.share) {
+        navigator.share({
+          title: (hotspot?.name || '서울') + ' 코스',
+          text: orderedPlaces.map((p, i) => orderedIcons[i] + ' ' + p.name).join('  →  '),
+          url: shareUrl,
+        })
+      } else {
+        navigator.clipboard?.writeText(shareUrl)
+        alert('공유 링크를 복사했어!\n' + shareUrl)
+      }
+    }
   }
 
   return (
@@ -164,7 +192,7 @@ export default function FinalCourse({ selections, onRestart, onBack }) {
         <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
           {[1,2,3,4,5,6,7].map(i => (
             <div key={i} style={{
-              flex: 1, height: '4px', borderRadius: '2px', background: '#f0f0f0'
+              flex: 1, height: '4px', borderRadius: '2px', background: '#FF6B35'
             }} />
           ))}
         </div>
@@ -211,7 +239,7 @@ export default function FinalCourse({ selections, onRestart, onBack }) {
 
       <div style={{ padding: '0 24px', marginBottom: '24px' }}>
         <div style={{
-          background: 'white', borderRadius: '16px',
+          background: '#fff8f5', borderRadius: '16px',
           padding: '20px', border: '1px solid #FFE0D0'
         }}>
           {orderedPlaces.map((place, idx) => (
@@ -219,7 +247,7 @@ export default function FinalCourse({ selections, onRestart, onBack }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{
                   width: '32px', height: '32px', borderRadius: '50%',
-                  background: '#f0f0f0', color: 'white',
+                  background: '#FF6B35', color: 'white',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '16px', fontWeight: '900', flexShrink: 0
                 }}>
@@ -261,7 +289,7 @@ export default function FinalCourse({ selections, onRestart, onBack }) {
                     {place?.address?.split(' ').slice(0, 3).join(' ')}
                   </p>
                   {place?.rating && (
-                    <p style={{ color: '#666', fontSize: '13px', marginTop: '2px' }}>
+                    <p style={{ color: '#FF6B35', fontSize: '13px', marginTop: '2px' }}>
                       ⭐ {place.rating.toFixed(1)}
                       {place.userRatingsTotal && (
                         <span style={{ color: '#aaa' }}> ({place.userRatingsTotal.toLocaleString()}개)</span>
@@ -280,13 +308,13 @@ export default function FinalCourse({ selections, onRestart, onBack }) {
 
               {idx < orderedPlaces.length - 1 && walkingTimes[idx] && (
                 <div style={{ textAlign: 'center', padding: '12px 0' }}>
-                  <span style={{ color: '#666', fontSize: '16px', fontWeight: '700' }}>
+                  <span style={{ color: '#FF6B35', fontSize: '16px', fontWeight: '700' }}>
                     ↓ 🚶 도보
                   </span>
                   <span style={{
                     background: 'white', border: '1px solid #FFE0D0',
                     borderRadius: '20px', padding: '4px 12px',
-                    fontSize: '13px', color: '#666',
+                    fontSize: '13px', color: '#FF6B35',
                     fontWeight: '600', marginLeft: '8px'
                   }}>
                     약 {walkingTimes[idx].minutes}분
@@ -314,7 +342,7 @@ export default function FinalCourse({ selections, onRestart, onBack }) {
 
       <div style={{ padding: '0 24px' }}>
         <button onClick={onRestart} style={{
-          background: '#f0f0f0', color: 'white', border: 'none',
+          background: '#FF6B35', color: 'white', border: 'none',
           padding: '16px', borderRadius: '12px',
           fontSize: '16px', fontWeight: '700', cursor: 'pointer',
           width: '100%',

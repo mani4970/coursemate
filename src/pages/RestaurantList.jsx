@@ -7,7 +7,7 @@ function StarRating({ rating }) {
   return (
     <span style={{ fontSize: '13px' }}>
       {'⭐'.repeat(stars)}{'☆'.repeat(5 - stars)}
-      <span style={{ color: '#666', fontWeight: '700', marginLeft: '4px' }}>{rating.toFixed(1)}</span>
+      <span style={{ color: '#FF6B35', fontWeight: '700', marginLeft: '4px' }}>{rating.toFixed(1)}</span>
     </span>
   )
 }
@@ -18,7 +18,7 @@ function PriceLevel({ level }) {
   const gray = '₩'.repeat(4 - level)
   return (
     <span style={{ fontSize: '13px' }}>
-      <span style={{ color: '#666', fontWeight: '700' }}>{won}</span>
+      <span style={{ color: '#FF6B35', fontWeight: '700' }}>{won}</span>
       <span style={{ color: '#ddd' }}>{gray}</span>
     </span>
   )
@@ -105,7 +105,7 @@ export default function RestaurantList({ selections, onNext, onBack, referencePo
           {[1,2,3,4,5,6].map(i => (
             <div key={i} style={{
               flex: 1, height: '4px', borderRadius: '2px',
-              background: i <= 6 ? '#f0f0f0' : '#f0f0f0'
+              background: i <= 6 ? '#FF6B35' : '#f0f0f0'
             }} />
           ))}
         </div>
@@ -122,14 +122,14 @@ export default function RestaurantList({ selections, onNext, onBack, referencePo
         </h1>
 
         <div style={{
-          background: 'white', borderRadius: '12px',
+          background: '#fff8f5', borderRadius: '12px',
           padding: '12px 16px', marginTop: '12px',
           border: '1px solid #FFE0D0'
         }}>
           {referencePoint ? (
             <>
               <p style={{ color: '#888', fontSize: '12px', marginBottom: '4px' }}>선택한 장소</p>
-              <p style={{ color: '#666', fontWeight: '700', fontSize: '15px' }}>
+              <p style={{ color: '#FF6B35', fontWeight: '700', fontSize: '15px' }}>
                 {referencePoint.name}
               </p>
               <p style={{ color: '#aaa', fontSize: '12px', marginTop: '4px' }}>
@@ -139,7 +139,7 @@ export default function RestaurantList({ selections, onNext, onBack, referencePo
           ) : (
             <>
               <p style={{ color: '#888', fontSize: '12px', marginBottom: '4px' }}>선택한 지역</p>
-              <p style={{ color: '#666', fontWeight: '700', fontSize: '15px' }}>
+              <p style={{ color: '#FF6B35', fontWeight: '700', fontSize: '15px' }}>
                 {basePoint?.name || '알 수 없음'}
               </p>
               <p style={{ color: '#aaa', fontSize: '12px', marginTop: '4px' }}>
@@ -157,8 +157,8 @@ export default function RestaurantList({ selections, onNext, onBack, referencePo
             <button
               onClick={() => setSortBy('rating')}
               style={{
-                background: sortBy === 'rating' ? 'white' : 'transparent',
-                color: sortBy === 'rating' ? '#f0f0f0' : '#888',
+                background: sortBy === 'rating' ? '#fff8f5' : 'transparent',
+                color: sortBy === 'rating' ? '#FF6B35' : '#888',
                 border: sortBy === 'rating' ? '1px solid #FFE0D0' : '1px solid transparent',
                 borderRadius: '8px', padding: '6px 12px',
                 fontSize: '13px', fontWeight: '700',
@@ -171,8 +171,8 @@ export default function RestaurantList({ selections, onNext, onBack, referencePo
             <button
               onClick={() => setSortBy('reviews')}
               style={{
-                background: sortBy === 'reviews' ? 'white' : 'transparent',
-                color: sortBy === 'reviews' ? '#f0f0f0' : '#888',
+                background: sortBy === 'reviews' ? '#fff8f5' : 'transparent',
+                color: sortBy === 'reviews' ? '#FF6B35' : '#888',
                 border: sortBy === 'reviews' ? '1px solid #FFE0D0' : '1px solid transparent',
                 borderRadius: '8px', padding: '6px 12px',
                 fontSize: '13px', fontWeight: '700',
@@ -185,8 +185,8 @@ export default function RestaurantList({ selections, onNext, onBack, referencePo
             <button
               onClick={() => setSortBy('distance')}
               style={{
-                background: sortBy === 'distance' ? 'white' : 'transparent',
-                color: sortBy === 'distance' ? '#f0f0f0' : '#888',
+                background: sortBy === 'distance' ? '#fff8f5' : 'transparent',
+                color: sortBy === 'distance' ? '#FF6B35' : '#888',
                 border: sortBy === 'distance' ? '1px solid #FFE0D0' : '1px solid transparent',
                 borderRadius: '8px', padding: '6px 12px',
                 fontSize: '13px', fontWeight: '700',
@@ -260,7 +260,7 @@ export default function RestaurantList({ selections, onNext, onBack, referencePo
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
                     <span style={{
-                      background: idx < 3 ? '#f0f0f0' : '#f0f0f0',
+                      background: idx < 3 ? '#FF6B35' : '#f0f0f0',
                       color: idx < 3 ? 'white' : '#888',
                       borderRadius: '6px', padding: '1px 6px',
                       fontSize: '11px', fontWeight: '700', flexShrink: 0
