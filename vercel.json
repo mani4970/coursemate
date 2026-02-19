@@ -1,14 +1,6 @@
-<<<<<<< HEAD
 {
   "rewrites": [
     { "source": "/api/places/search", "destination": "/api/places" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
-=======
-{
-  "rewrites": [
-    { "source": "/api/places/search", "destination": "/api/places" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
->>>>>>> 9f79ebef36aac49ae5ad3274984f10861738d2da
 }
