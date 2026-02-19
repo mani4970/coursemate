@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 const typeMap = {
   // 한식
   korean_restaurant: '🍚 한식',
@@ -36,7 +36,7 @@ const typeMap = {
 export function getTypeLabel(primaryType) {
   if (!primaryType) return null
   return typeMap[primaryType] || null
-=======
+
 const typeMap = {
   // 한식
   korean_restaurant: '🍚 한식',
@@ -74,5 +74,4 @@ const typeMap = {
 export function getTypeLabel(primaryType) {
   if (!primaryType) return null
   return typeMap[primaryType] || null
->>>>>>> 9f79ebef36aac49ae5ad3274984f10861738d2da
 }
