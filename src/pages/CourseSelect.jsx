@@ -34,7 +34,7 @@ export default function CourseSelect({ selections, onNext, onBack, onHome }) {
           {[1,2,3,4,5].map(i => (
             <div key={i} style={{
               flex: 1, height: '4px', borderRadius: '2px',
-              background: i <= 3 ? '#FF6B35' : '#f0f0f0'
+              background: i <= 3 ? '#f0f0f0' : '#f0f0f0'
             }} />
           ))}
         </div>
@@ -57,7 +57,7 @@ export default function CourseSelect({ selections, onNext, onBack, onHome }) {
           )}
         </div>
 
-        <p style={{ color: '#FF6B35', fontWeight: '600', marginBottom: '8px' }}>
+        <p style={{ color: '#666', fontWeight: '600', marginBottom: '8px' }}>
           Step 3 / 5
         </p>
         <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1a1a1a' }}>
@@ -69,14 +69,14 @@ export default function CourseSelect({ selections, onNext, onBack, onHome }) {
 
         {selectedOrder.length > 0 && (
           <div style={{
-            background: '#fff8f5', borderRadius: '12px',
+            background: 'white', borderRadius: '12px',
             padding: '12px 16px', marginTop: '16px',
             border: '1px solid #FFE0D0'
           }}>
             <p style={{ color: '#888', fontSize: '12px', marginBottom: '6px' }}>
               선택한 순서
             </p>
-            <p style={{ color: '#FF6B35', fontWeight: '700', fontSize: '14px' }}>
+            <p style={{ color: '#666', fontWeight: '700', fontSize: '14px' }}>
               {selectedOrder.map((id, idx) => {
                 const opt = options.find(o => o.id === id)
                 return (
@@ -108,8 +108,8 @@ export default function CourseSelect({ selections, onNext, onBack, onHome }) {
                   gap: '14px',
                   padding: '18px',
                   borderRadius: '16px',
-                  border: isSelected ? '2px solid #FF6B35' : '2px solid #f0f0f0',
-                  background: isSelected ? '#fff8f5' : 'white',
+                  border: isSelected ? '2px solid #f0f0f0' : '2px solid #f0f0f0',
+                  background: isSelected ? 'white' : 'white',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                 }}
@@ -122,7 +122,7 @@ export default function CourseSelect({ selections, onNext, onBack, onHome }) {
                     width: '28px',
                     height: '28px',
                     borderRadius: '50%',
-                    background: '#FF6B35',
+                    background: '#f0f0f0',
                     color: 'white',
                     display: 'flex',
                     alignItems: 'center',
@@ -138,7 +138,7 @@ export default function CourseSelect({ selections, onNext, onBack, onHome }) {
                   width: '52px',
                   height: '52px',
                   borderRadius: '14px',
-                  background: isSelected ? '#FF6B35' : '#f5f5f5',
+                  background: isSelected ? '#f0f0f0' : '#f5f5f5',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -153,7 +153,7 @@ export default function CourseSelect({ selections, onNext, onBack, onHome }) {
                   <p style={{
                     fontWeight: '800',
                     fontSize: '17px',
-                    color: isSelected ? '#FF6B35' : '#1a1a1a',
+                    color: isSelected ? '#f0f0f0' : '#1a1a1a',
                     marginBottom: '2px'
                   }}>
                     {opt.label}
@@ -168,7 +168,7 @@ export default function CourseSelect({ selections, onNext, onBack, onHome }) {
                     width: '24px',
                     height: '24px',
                     borderRadius: '50%',
-                    background: '#FF6B35',
+                    background: '#f0f0f0',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -199,7 +199,7 @@ export default function CourseSelect({ selections, onNext, onBack, onHome }) {
           onClick={handleContinue}
           disabled={selectedOrder.length === 0}
           style={{
-            background: selectedOrder.length > 0 ? '#FF6B35' : '#ccc',
+            background: selectedOrder.length > 0 ? '#f0f0f0' : '#ccc',
             color: 'white',
             border: 'none',
             padding: '16px',

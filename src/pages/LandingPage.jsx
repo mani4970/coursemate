@@ -6,7 +6,7 @@ function CourseMateLogo({ size = 32, white = false }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <div style={{
         width: size, height: size,
-        background: 'linear-gradient(135deg, #FF6B35, #FF9A6C)',
+        background: 'linear-gradient(135deg, #f0f0f0, #FF9A6C)',
         borderRadius: size * 0.28,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         boxShadow: '0 4px 12px rgba(255,107,53,0.35)',
@@ -14,7 +14,7 @@ function CourseMateLogo({ size = 32, white = false }) {
       }}>
         <svg width={size * 0.58} height={size * 0.58} viewBox="0 0 24 24" fill="none">
           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="white"/>
-          <circle cx="12" cy="9" r="2.5" fill="#FF6B35"/>
+          <circle cx="12" cy="9" r="2.5" fill="#f0f0f0"/>
         </svg>
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '1px' }}>
@@ -26,7 +26,7 @@ function CourseMateLogo({ size = 32, white = false }) {
         <span style={{
           fontFamily: "'Nunito', 'Noto Sans KR', sans-serif",
           fontWeight: '800', fontSize: size * 0.65,
-          color: '#FF6B35', letterSpacing: '-0.5px',
+          color: '#666', letterSpacing: '-0.5px',
         }}>Mate</span>
       </div>
     </div>
@@ -106,7 +106,7 @@ export default function LandingPage({ onStartGuided, onStartDirect }) {
             display: 'inline-flex', alignItems: 'center', gap: '6px',
             background: '#FFF0EA', border: '1px solid #FFD4C2',
             borderRadius: '20px', padding: '6px 14px',
-            fontSize: '13px', color: '#FF6B35',
+            fontSize: '13px', color: '#666',
             fontWeight: '700', marginBottom: '20px',
           }}>
             <span>✨</span>
@@ -119,7 +119,7 @@ export default function LandingPage({ onStartGuided, onStartDirect }) {
             color: '#1a1a1a', letterSpacing: '-0.5px',
           }}>
             오늘 어디 가지? 🤔<br />
-            <span style={{ color: '#FF6B35' }}>CourseMate</span>한테<br />
+            <span style={{ color: '#666' }}>CourseMate</span>한테<br />
             물어봐요!
           </h1>
 
@@ -136,7 +136,7 @@ export default function LandingPage({ onStartGuided, onStartDirect }) {
             <button
               onClick={onStartGuided}
               style={{
-                background: 'linear-gradient(135deg, #FF6B35, #FF8C5A)',
+                background: 'linear-gradient(135deg, #f0f0f0, #FF8C5A)',
                 color: 'white', border: 'none',
                 padding: '18px 24px', borderRadius: '18px',
                 fontSize: '17px', fontWeight: '800',
@@ -154,7 +154,7 @@ export default function LandingPage({ onStartGuided, onStartDirect }) {
               onClick={onStartDirect}
               style={{
                 background: 'white',
-                color: '#FF6B35', border: '2px solid #FF6B35',
+                color: '#666', border: '2px solid #f0f0f0',
                 padding: '16px 24px', borderRadius: '18px',
                 fontSize: '16px', fontWeight: '800',
                 cursor: 'pointer', width: '100%',
@@ -188,7 +188,7 @@ export default function LandingPage({ onStartGuided, onStartDirect }) {
                 🎉 추천 코스 예시
               </p>
               <span style={{
-                background: '#FFF0EA', color: '#FF6B35',
+                background: '#FFF0EA', color: '#666',
                 borderRadius: '10px', padding: '3px 10px',
                 fontSize: '11px', fontWeight: '700'
               }}>강남역 · 데이트</span>
@@ -200,13 +200,13 @@ export default function LandingPage({ onStartGuided, onStartDirect }) {
               }}>
                 <div style={{
                   width: '44px', height: '44px', borderRadius: '12px',
-                  background: '#FF6B35', display: 'flex',
+                  background: '#f0f0f0', display: 'flex',
                   alignItems: 'center', justifyContent: 'center',
                   fontSize: '22px', flexShrink: 0,
                 }}>🍽️</div>
                 <div>
                   <p style={{ fontWeight: '800', fontSize: '14px', color: '#1a1a1a' }}>스시 오마카세</p>
-                  <p style={{ color: '#FF6B35', fontSize: '12px', marginTop: '2px' }}>⭐ 4.8 · 🍣 일식 · 350m</p>
+                  <p style={{ color: '#666', fontSize: '12px', marginTop: '2px' }}>⭐ 4.8 · 🍣 일식 · 350m</p>
                 </div>
               </div>
               <div style={{ textAlign: 'center', color: '#ccc', fontSize: '13px' }}>
@@ -218,13 +218,13 @@ export default function LandingPage({ onStartGuided, onStartDirect }) {
               }}>
                 <div style={{
                   width: '44px', height: '44px', borderRadius: '12px',
-                  background: '#FF6B35', display: 'flex',
+                  background: '#f0f0f0', display: 'flex',
                   alignItems: 'center', justifyContent: 'center',
                   fontSize: '22px', flexShrink: 0,
                 }}>☕</div>
                 <div>
                   <p style={{ fontWeight: '800', fontSize: '14px', color: '#1a1a1a' }}>감성 루프탑 카페</p>
-                  <p style={{ color: '#FF6B35', fontSize: '12px', marginTop: '2px' }}>⭐ 4.6 · ☕ 카페 · 670m</p>
+                  <p style={{ color: '#666', fontSize: '12px', marginTop: '2px' }}>⭐ 4.6 · ☕ 카페 · 670m</p>
                 </div>
               </div>
             </div>
@@ -281,7 +281,7 @@ export default function LandingPage({ onStartGuided, onStartDirect }) {
                 <div style={{
                   width: '44px', height: '44px', borderRadius: '14px',
                   background: i === steps.length - 1
-                    ? 'linear-gradient(135deg, #FF6B35, #FF8C5A)'
+                    ? 'linear-gradient(135deg, #f0f0f0, #FF8C5A)'
                     : '#FFF0EA',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '22px', flexShrink: 0,
@@ -293,7 +293,7 @@ export default function LandingPage({ onStartGuided, onStartDirect }) {
                   <p style={{ color: '#aaa', fontSize: '13px' }}>{s.desc}</p>
                 </div>
                 <span style={{
-                  background: '#FFF0EA', color: '#FF6B35',
+                  background: '#FFF0EA', color: '#666',
                   borderRadius: '10px', padding: '3px 9px',
                   fontSize: '11px', fontWeight: '800',
                 }}>
@@ -307,7 +307,7 @@ export default function LandingPage({ onStartGuided, onStartDirect }) {
         {/* 하단 CTA */}
         <div style={{ padding: '0 24px 60px', ...fadeUp(0.4) }}>
           <div style={{
-            background: 'linear-gradient(135deg, #FF6B35, #FF8C5A)',
+            background: 'linear-gradient(135deg, #f0f0f0, #FF8C5A)',
             borderRadius: '24px', padding: '32px 24px',
             textAlign: 'center',
             boxShadow: '0 12px 40px rgba(255,107,53,0.3)',
@@ -329,7 +329,7 @@ export default function LandingPage({ onStartGuided, onStartDirect }) {
               onClick={onStartGuided}
               style={{
                 background: 'white',
-                color: '#FF6B35', border: 'none',
+                color: '#666', border: 'none',
                 padding: '16px 40px', borderRadius: '14px',
                 fontSize: '16px', fontWeight: '900',
                 cursor: 'pointer', width: '100%',

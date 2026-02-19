@@ -9,6 +9,7 @@ import CuisineSelect from './pages/CuisineSelect'
 import RestaurantList from './pages/RestaurantList'
 import CafeList from './pages/CafeList'
 import FinalCourse from './pages/FinalCourse'
+import SelectionTrail from './components/SelectionTrail'
 import './App.css'
 
 const HOTSPOTS = [
@@ -56,25 +57,20 @@ function App() {
     cafeCuisine: 'all',
     barCuisine: 'all',
     restaurant: null,
+    restaurant2: null,
     cafe: null,
     cafe2: null,
+    // optional ordered places array for FinalCourse rendering
+    routePlaces: null,
   })
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const shareParam = params.get('s') || params.get('share')
-
-    const b64DecodeUnicode = (str) => {
-      try {
-        return decodeURIComponent(escape(atob(str)))
-      } catch {
-        return atob(str)
-      }
-    }
     
     if (shareParam) {
       try {
-        const decoded = JSON.parse(b64DecodeUnicode(shareParam))
+        const decoded = JSON.parse(atob(shareParam))
         
         setSelections({
           hotspot: { name: decoded.h || '서울' },
@@ -96,12 +92,7 @@ function App() {
             lng: decoded.c.y,
             kakaoMapUrl: 'https://map.kakao.com/link/search/' + encodeURIComponent(decoded.c.n),
           } : null,
-          cafe2: decoded.b ? {
-            name: decoded.b.n,
-            lat: decoded.b.x,
-            lng: decoded.b.y,
-            kakaoMapUrl: 'https://map.kakao.com/link/search/' + encodeURIComponent(decoded.b.n),
-          } : null,
+          cafe2: null,
         })
         
         setIsSharedCourse(true)
@@ -118,7 +109,6 @@ function App() {
   const next = () => setStep(prev => prev + 1)
   const back = () => setStep(prev => prev - 1)
 
-  // FIXED: 완전히 새로 시작
   const restart = () => {
     setStep(0)
     setFlowType(null)
@@ -127,19 +117,29 @@ function App() {
     setCourseOrder([])
     setCurrentOrderIndex(0)
     setSelectedPlaces([])
-    // FIXED: 완전히 새로운 객체로 교체
     setSelections({
-      hotspot: null,
-      occasion: null,
-      courseOrder: [],
-      budget: null,
-      restaurantCuisine: 'all',
-      cafeCuisine: 'all',
-      barCuisine: 'all',
-      restaurant: null,
-      cafe: null,
-      cafe2: null,
+      hotspot: null, occasion: null, courseOrder: [], budget: null,
+      restaurantCuisine: 'all', cafeCuisine: 'all', barCuisine: 'all',
+      restaurant: null, restaurant2: null, cafe: null, cafe2: null,
+      routePlaces: null,
     })
+  }
+
+  const startFlow = (type) => {
+    // prevent leaking previous selections when switching flows
+    setIsSharedCourse(false)
+    setDirectInputNextType(null)
+    setCourseOrder([])
+    setCurrentOrderIndex(0)
+    setSelectedPlaces([])
+    setSelections({
+      hotspot: null, occasion: null, courseOrder: [], budget: null,
+      restaurantCuisine: 'all', cafeCuisine: 'all', barCuisine: 'all',
+      restaurant: null, restaurant2: null, cafe: null, cafe2: null,
+      routePlaces: null,
+    })
+    setFlowType(type)
+    setStep(type === 'guided' ? 1 : 50)
   }
 
   function handleDirectInputSelect(data) {
@@ -149,12 +149,11 @@ function App() {
       setSelections(prev => ({
         ...prev,
         restaurant: data.restaurant,
-        hotspot: data.restaurant.hotspot || prev.hotspot || { name: '서울' },
-        courseOrder:
-          data.nextType === 'both' ? ['restaurant', 'cafe', 'bar'] :
-          data.nextType === 'cafe' ? ['restaurant', 'cafe'] :
-          data.nextType === 'bar' ? ['restaurant', 'bar'] :
-          data.nextType === 'restaurant' ? ['restaurant', 'restaurant'] : [],
+        restaurant2: null,
+        cafe: null,
+        cafe2: null,
+        routePlaces: null,
+        hotspot: data.restaurant.hotspot || { name: '서울' },
       }))
 
       if (data.nextType === 'cafe') {
@@ -170,8 +169,11 @@ function App() {
       setSelections(prev => ({
         ...prev,
         cafe: data.cafe,
-        hotspot: data.cafe.hotspot || prev.hotspot || { name: '서울' },
-        courseOrder: ['cafe', 'restaurant'],
+        restaurant: null,
+        restaurant2: null,
+        cafe2: null,
+        routePlaces: null,
+        hotspot: data.cafe.hotspot || { name: '서울' },
       }))
       setStep(201)
     }
@@ -179,13 +181,12 @@ function App() {
 
   function handleCourseOrderSelect(data) {
     setCourseOrder(data.courseOrder)
-    setSelections(prev => ({ ...prev, courseOrder: data.courseOrder }))
+    setSelections(prev => ({ ...prev, courseOrder: data.courseOrder, routePlaces: null, restaurant2: null }))
     setCurrentOrderIndex(0)
     setSelectedPlaces([])
     next()
   }
 
-  // FIXED: cafe/bar 구분 제대로
   function handlePlaceSelect(place) {
     const newSelectedPlaces = [...selectedPlaces, place]
     setSelectedPlaces(newSelectedPlaces)
@@ -193,17 +194,16 @@ function App() {
     const placeType = courseOrder[currentOrderIndex]
     
     if (placeType === 'restaurant') {
-      update('restaurant', place)
-    } else if (placeType === 'cafe') {
-      // FIXED: cafe는 무조건 cafe에
-      if (!selections.cafe) {
-        update('cafe', place)
-      } else {
-        update('cafe2', place)
-      }
-    } else if (placeType === 'bar') {
-      // FIXED: bar는 cafe2에 (또는 cafe가 없으면 cafe에)
-      if (!selections.cafe) {
+      const restaurantCount = selectedPlaces.filter((p, idx) => courseOrder[idx] === 'restaurant').length
+      if (restaurantCount === 0) update('restaurant', place)
+      else update('restaurant2', place)
+    } else if (placeType === 'cafe' || placeType === 'bar') {
+      const cafeOrBarCount = selectedPlaces.filter(p => {
+        const idx = selectedPlaces.indexOf(p)
+        return courseOrder[idx] === 'cafe' || courseOrder[idx] === 'bar'
+      }).length
+      
+      if (cafeOrBarCount === 0) {
         update('cafe', place)
       } else {
         update('cafe2', place)
@@ -214,8 +214,30 @@ function App() {
       setCurrentOrderIndex(prev => prev + 1)
       next()
     } else {
+      setSelections(prev => ({ ...prev, routePlaces: newSelectedPlaces }))
       setStep(100)
     }
+  }
+
+  function handleGuidedBack() {
+    if (currentOrderIndex === 0) {
+      back()
+      return
+    }
+    const removedType = courseOrder[currentOrderIndex]
+    const newSelectedPlaces = selectedPlaces.slice(0, -1)
+    setSelectedPlaces(newSelectedPlaces)
+
+    if (removedType === 'restaurant') {
+      if (selections.restaurant2) update('restaurant2', null)
+      else update('restaurant', null)
+    } else if (removedType === 'cafe' || removedType === 'bar') {
+      if (selections.cafe2) update('cafe2', null)
+      else update('cafe', null)
+    }
+    setSelections(prev => ({ ...prev, routePlaces: null }))
+    setCurrentOrderIndex(prev => Math.max(0, prev - 1))
+    back()
   }
 
   function getReferencePoint() {
@@ -223,29 +245,6 @@ function App() {
       return selections.hotspot
     }
     return selectedPlaces[currentOrderIndex - 1]
-  }
-
-  // FIXED: back 시 선택 데이터 제거
-  function handleBack() {
-    if (currentOrderIndex === 0) {
-      back()
-    } else {
-      // 마지막 선택 제거
-      const lastPlaceType = courseOrder[currentOrderIndex - 1]
-      if (lastPlaceType === 'restaurant') {
-        update('restaurant', null)
-      } else if (lastPlaceType === 'cafe' || lastPlaceType === 'bar') {
-        if (selections.cafe2) {
-          update('cafe2', null)
-        } else {
-          update('cafe', null)
-        }
-      }
-      
-      setCurrentOrderIndex(prev => prev - 1)
-      setSelectedPlaces(prev => prev.slice(0, -1))
-      back()
-    }
   }
 
   if (isSharedCourse && step === 100) {
@@ -262,18 +261,20 @@ function App() {
 
   return (
     <div className="app">
+      <SelectionTrail selections={selections} flowType={flowType} step={step} />
       {step === 0 && !flowType && (
         <LandingPage
-          onStartGuided={() => { setFlowType('guided'); setStep(1) }}
-          onStartDirect={() => { setFlowType('direct'); setStep(50) }}
+          onStartGuided={() => startFlow('guided')}
+          onStartDirect={() => startFlow('direct')}
         />
       )}
 
-      {/* Direct Input Flow */}
       {flowType === 'direct' && step === 50 && (
         <DirectInput
           onNext={handleDirectInputSelect}
-          onBack={restart}
+          onBack={() => restart()}
+          // Keep the previously selected place when navigating back from lists/final screen
+          initialPlace={selections.restaurant || selections.cafe}
         />
       )}
       {flowType === 'direct' && step === 200 && (
@@ -286,18 +287,32 @@ function App() {
             if (directInputNextType === 'both') {
               setStep(202)
             } else {
+              setSelections(prev => ({ ...prev, routePlaces: [prev.restaurant, value].filter(Boolean) }))
               setStep(100)
             }
           }}
-          onBack={() => setStep(50)}
+          onBack={() => {
+            setSelections(prev => ({ ...prev, cafe: null, cafe2: null, routePlaces: null }))
+            setStep(50)
+          }}
         />
       )}
       {flowType === 'direct' && step === 201 && (
         <RestaurantList
           selections={selections}
           referencePoint={selections.cafe}
-          onNext={value => { update('restaurant', value); setStep(100) }}
-          onBack={() => setStep(50)}
+          onNext={value => {
+            if (directInputNextType === 'restaurant' && selections.restaurant) {
+              setSelections(prev => ({ ...prev, restaurant2: value, routePlaces: [prev.restaurant, value].filter(Boolean) }))
+            } else {
+              setSelections(prev => ({ ...prev, restaurant: value, routePlaces: [value].filter(Boolean) }))
+            }
+            setStep(100)
+          }}
+          onBack={() => {
+            setSelections(prev => ({ ...prev, restaurant2: null, routePlaces: null }))
+            setStep(50)
+          }}
         />
       )}
       {flowType === 'direct' && step === 202 && (
@@ -306,14 +321,17 @@ function App() {
           type="bar"
           referencePoint={selections.cafe}
           onNext={value => {
-            setSelections(prev => ({ ...prev, cafe2: value }))
+            setSelections(prev => ({ ...prev, cafe2: value, routePlaces: [prev.restaurant, prev.cafe, value].filter(Boolean) }))
             setStep(100)
           }}
-          onBack={() => directInputNextType === 'both' ? setStep(200) : setStep(50)}
+          onBack={() => {
+            setSelections(prev => ({ ...prev, cafe2: null, routePlaces: null }))
+            if (directInputNextType === 'both') setStep(200)
+            else setStep(50)
+          }}
         />
       )}
 
-      {/* Guided Flow */}
       {flowType === 'guided' && step === 1 && (
         <LocationSelect
           hotspots={HOTSPOTS}
@@ -359,7 +377,7 @@ function App() {
               selections={selections}
               referencePoint={getReferencePoint()}
               onNext={handlePlaceSelect}
-              onBack={handleBack}
+              onBack={handleGuidedBack}
             />
           )}
           {(courseOrder[currentOrderIndex] === 'cafe' || courseOrder[currentOrderIndex] === 'bar') && (
@@ -368,7 +386,7 @@ function App() {
               type={courseOrder[currentOrderIndex]}
               referencePoint={getReferencePoint()}
               onNext={handlePlaceSelect}
-              onBack={handleBack}
+              onBack={handleGuidedBack}
             />
           )}
         </>
@@ -380,15 +398,9 @@ function App() {
           onRestart={restart}
           onBack={() => {
             if (flowType === 'direct') {
-              if (directInputNextType === 'both') {
-                setStep(202)
-              } else if (directInputNextType === 'cafe') {
-                setStep(200)
-              } else if (directInputNextType === 'bar') {
-                setStep(202)
-              } else if (directInputNextType === 'restaurant') {
-                setStep(201)
-              }
+              // In direct-search flow, "Back" should return to the DirectInput screen
+              // so the user can switch what to search next (restaurant vs cafe vs bar).
+              setStep(50)
             } else {
               setCurrentOrderIndex(courseOrder.length - 1)
               setSelectedPlaces(prev => prev.slice(0, -1))

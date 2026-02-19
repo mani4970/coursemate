@@ -1,10 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-export default function DirectInput({ onNext, onBack }) {
+export default function DirectInput({ onNext, onBack, initialPlace = null }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [selectedPlace, setSelectedPlace] = useState(null)
+
+  // If the user navigates back from later steps (lists/final screen),
+  // keep the previously selected place so the screen doesn't feel "reset".
+  useEffect(() => {
+    if (initialPlace) {
+      setSelectedPlace(initialPlace)
+    }
+  }, [initialPlace])
 
   function handleSearch() {
     if (!searchQuery.trim()) {
@@ -78,21 +86,21 @@ export default function DirectInput({ onNext, onBack }) {
         </p>
 
         <div style={{
-          background: '#fff8f5', borderRadius: '16px',
+          background: 'white', borderRadius: '16px',
           padding: '16px', marginBottom: '24px',
           border: '1px solid #FFE0D0'
         }}>
           <p style={{ color: '#888', fontSize: '12px', marginBottom: '6px' }}>
             📍 선택한 장소
           </p>
-          <p style={{ fontWeight: '800', fontSize: '16px', color: '#FF6B35', marginBottom: '4px' }}>
+          <p style={{ fontWeight: '800', fontSize: '16px', color: '#666', marginBottom: '4px' }}>
             {selectedPlace.name}
           </p>
           <p style={{ color: '#aaa', fontSize: '13px' }}>
             {selectedPlace.address?.split(' ').slice(0, 4).join(' ')}
           </p>
           {selectedPlace.rating && (
-            <p style={{ color: '#FF6B35', fontSize: '13px', marginTop: '6px' }}>
+            <p style={{ color: '#666', fontSize: '13px', marginTop: '6px' }}>
               ⭐ {selectedPlace.rating.toFixed(1)}
               {selectedPlace.userRatingsTotal && (
                 <span style={{ color: '#aaa' }}> ({selectedPlace.userRatingsTotal.toLocaleString()}개)</span>
@@ -118,7 +126,7 @@ export default function DirectInput({ onNext, onBack }) {
                 style={{
                   padding: '16px', borderRadius: '14px',
                   border: '2px solid #f0f0f0',
-                  background: opt.highlight ? '#fff8f5' : 'white',
+                  background: opt.highlight ? 'white' : 'white',
                   cursor: 'pointer', textAlign: 'left',
                   WebkitTapHighlightColor: 'transparent',
                 }}
@@ -134,7 +142,7 @@ export default function DirectInput({ onNext, onBack }) {
                     </p>
                     <p style={{ color: '#888', fontSize: '13px' }}>{opt.desc}</p>
                   </div>
-                  <span style={{ color: opt.highlight ? '#FF6B35' : '#ccc', fontSize: '20px' }}>›</span>
+                  <span style={{ color: opt.highlight ? '#f0f0f0' : '#ccc', fontSize: '20px' }}>›</span>
                 </div>
               </button>
             ))}
@@ -192,7 +200,7 @@ export default function DirectInput({ onNext, onBack }) {
               right: '8px',
               top: '50%',
               transform: 'translateY(-50%)',
-              background: searchQuery.trim() ? '#FF6B35' : '#ccc',
+              background: searchQuery.trim() ? '#f0f0f0' : '#ccc',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
@@ -271,7 +279,7 @@ export default function DirectInput({ onNext, onBack }) {
                         {place.address?.split(' ').slice(0, 4).join(' ')}
                       </p>
                       {place.rating && (
-                        <p style={{ color: '#FF6B35', fontSize: '13px' }}>
+                        <p style={{ color: '#666', fontSize: '13px' }}>
                           ⭐ {place.rating.toFixed(1)}
                           {place.userRatingsTotal && (
                             <span style={{ color: '#aaa' }}> ({place.userRatingsTotal.toLocaleString()}개)</span>
